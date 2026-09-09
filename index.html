@@ -174,25 +174,32 @@ button{
     margin-bottom:12px;
 }
 
+.this-month-button:active{
+    transform:scale(0.98);
+}
+
 .this-month-note{
     text-align:center;
     font-size:12px;
     color:#777;
-    margin:0 0 15px;
-}
-
-/* 返済予定 */
-
-.schedule-header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:10px;
-}
-
-.schedule-header h2{
     margin:0;
+    line-height:1.6;
 }
+
+/* 今月返済済み */
+
+.month-paid{
+    display:none;
+    text-align:center;
+    background:#e8f5e9;
+    color:#2e7d32;
+    border-radius:10px;
+    padding:13px;
+    font-weight:bold;
+    margin-top:10px;
+}
+
+/* 進捗 */
 
 .progress-area{
     margin:15px 0;
@@ -240,18 +247,14 @@ button{
 
 .payment-item.paid{
     background:#e8f5e9;
-}
-
-.payment-item input{
-    width:22px;
-    height:22px;
-    flex-shrink:0;
+    border-color:#c8e6c9;
 }
 
 .payment-number{
     width:42px;
     font-weight:bold;
     color:#777;
+    flex-shrink:0;
 }
 
 .payment-date{
@@ -277,6 +280,7 @@ button{
     color:#2e7d32;
     font-size:12px;
     font-weight:bold;
+    margin-top:3px;
 }
 
 /* 最終メッセージ */
@@ -312,9 +316,16 @@ button{
 
 <div class="container">
 
+    <!-- ヘッダー -->
+
     <div class="header">
+
         <h1>💰 返済計画</h1>
-        <p>無利息・毎月コツコツ返済</p>
+
+        <p>
+            無利息・毎月コツコツ返済
+        </p>
+
     </div>
 
 
@@ -328,7 +339,10 @@ button{
                 現在の残り返済額
             </div>
 
-            <div class="amount" id="remainingAmount">
+            <div
+                class="amount"
+                id="remainingAmount"
+            >
                 680,000円
             </div>
 
@@ -369,7 +383,10 @@ button{
                     残り回数
                 </div>
 
-                <div class="value" id="remainingCount">
+                <div
+                    class="value"
+                    id="remainingCount"
+                >
                     68回
                 </div>
 
@@ -382,7 +399,10 @@ button{
                     返済済み
                 </div>
 
-                <div class="value" id="paidCount">
+                <div
+                    class="value"
+                    id="paidCount"
+                >
                     0回
                 </div>
 
@@ -466,12 +486,23 @@ button{
 
         <h2>💴 今月の返済</h2>
 
+
         <button
             class="this-month-button"
+            id="thisMonthButton"
             onclick="payThisMonth()"
         >
             ✅ 今月返済した！
         </button>
+
+
+        <div
+            class="month-paid"
+            id="monthPaid"
+        >
+            ✅ 今月分は返済済みです！
+        </div>
+
 
         <p class="this-month-note">
             給料から1万円が天引きされたら押してください
@@ -486,6 +517,7 @@ button{
 
         <h2>📊 返済進捗</h2>
 
+
         <div class="progress-area">
 
             <div class="progress-text">
@@ -499,6 +531,7 @@ button{
                 </span>
 
             </div>
+
 
             <div class="progress">
 
@@ -535,6 +568,7 @@ button{
 
         </div>
 
+
         <div
             class="payment-list"
             id="paymentList"
@@ -543,18 +577,23 @@ button{
     </div>
 
 
-    <!-- リセット -->
+    <!-- データ管理 -->
 
     <div class="card">
 
         <h2>🔧 データ管理</h2>
 
+
         <p class="note">
-            返済済みのチェック状態や返済設定は、
+
+            返済済みの記録や返済設定は、
             このスマホのブラウザに保存されます。
+
         </p>
 
+
         <br>
+
 
         <button
             class="danger"
@@ -580,6 +619,7 @@ button{
 ========================= */
 
 const DEFAULT_LOAN = 680000;
+
 const DEFAULT_MONTHLY = 10000;
 
 
@@ -591,34 +631,40 @@ function getToday(){
 
     const today = new Date();
 
-    const year = today.getFullYear();
+    const year =
+        today.getFullYear();
 
     const month =
-        String(today.getMonth() + 1)
-        .padStart(2, "0");
+        String(
+            today.getMonth() + 1
+        ).padStart(2,"0");
 
     const day =
-        String(today.getDate())
-        .padStart(2, "0");
+        String(
+            today.getDate()
+        ).padStart(2,"0");
 
     return `${year}-${month}-${day}`;
+
 }
 
 
 /* =========================
-   初回返済月を取得
+   初回返済月
 ========================= */
 
 function getDefaultStartMonth(){
 
-    const today = new Date();
+    const today =
+        new Date();
 
     const year =
         today.getFullYear();
 
     const month =
-        String(today.getMonth() + 1)
-        .padStart(2, "0");
+        String(
+            today.getMonth() + 1
+        ).padStart(2,"0");
 
     return `${year}-${month}`;
 
@@ -632,29 +678,28 @@ function getDefaultStartMonth(){
 function initialize(){
 
     const saved =
-        localStorage.getItem("repaymentSettings");
+        localStorage.getItem(
+            "repaymentSettings"
+        );
+
 
     if(saved){
 
         const settings =
             JSON.parse(saved);
 
-        document.getElementById("loanAmount").value =
+
+        document.getElementById(
+            "loanAmount"
+        ).value =
             settings.loanAmount;
 
-        document.getElementById("monthlyPayment").value =
+
+        document.getElementById(
+            "monthlyPayment"
+        ).value =
             settings.monthlyPayment;
 
-
-        /*
-
-           以前の日付形式
-           2026-09-09
-
-           でも保存されている場合、
-           2026-09だけを取り出す
-
-        */
 
         let startMonth =
             settings.startDate || "";
@@ -668,21 +713,32 @@ function initialize(){
         }
 
 
-        document.getElementById("startDate").value =
+        document.getElementById(
+            "startDate"
+        ).value =
             startMonth;
 
     }else{
 
-        document.getElementById("loanAmount").value =
+        document.getElementById(
+            "loanAmount"
+        ).value =
             DEFAULT_LOAN;
 
-        document.getElementById("monthlyPayment").value =
+
+        document.getElementById(
+            "monthlyPayment"
+        ).value =
             DEFAULT_MONTHLY;
 
-        document.getElementById("startDate").value =
+
+        document.getElementById(
+            "startDate"
+        ).value =
             getDefaultStartMonth();
 
     }
+
 
     render();
 
@@ -697,49 +753,69 @@ function saveSettings(){
 
     const loanAmount =
         Number(
-            document.getElementById("loanAmount").value
+            document.getElementById(
+                "loanAmount"
+            ).value
         );
+
 
     const monthlyPayment =
         Number(
-            document.getElementById("monthlyPayment").value
+            document.getElementById(
+                "monthlyPayment"
+            ).value
         );
 
+
     const startDate =
-        document.getElementById("startDate").value;
+        document.getElementById(
+            "startDate"
+        ).value;
 
 
     if(loanAmount <= 0){
 
-        alert("借入金額を入力してください。");
+        alert(
+            "借入金額を入力してください。"
+        );
 
         return;
+
     }
 
 
     if(monthlyPayment <= 0){
 
-        alert("毎月の返済額を入力してください。");
+        alert(
+            "毎月の返済額を入力してください。"
+        );
 
         return;
+
     }
 
 
     if(!startDate){
 
-        alert("初回返済月を入力してください。");
+        alert(
+            "初回返済月を入力してください。"
+        );
 
         return;
+
     }
 
 
     const settings = {
 
-        loanAmount: loanAmount,
+        loanAmount:
+            loanAmount,
 
-        monthlyPayment: monthlyPayment,
+        monthlyPayment:
+            monthlyPayment,
 
-        startDate: startDate
+        startDate:
+            startDate
 
     };
 
@@ -753,7 +829,7 @@ function saveSettings(){
     const answer =
         confirm(
             "返済設定を更新しました。\n\n" +
-            "返済済みチェックをリセットしますか？"
+            "返済済み記録をリセットしますか？"
         );
 
 
@@ -768,7 +844,10 @@ function saveSettings(){
 
     render();
 
-    alert("返済計画を更新しました！");
+
+    alert(
+        "返済計画を更新しました！"
+    );
 
 }
 
@@ -780,7 +859,9 @@ function saveSettings(){
 function getSettings(){
 
     const saved =
-        localStorage.getItem("repaymentSettings");
+        localStorage.getItem(
+            "repaymentSettings"
+        );
 
 
     if(saved){
@@ -804,10 +885,14 @@ function getSettings(){
         return {
 
             loanAmount:
-                Number(settings.loanAmount),
+                Number(
+                    settings.loanAmount
+                ),
 
             monthlyPayment:
-                Number(settings.monthlyPayment),
+                Number(
+                    settings.monthlyPayment
+                ),
 
             startDate:
                 startDate
@@ -843,7 +928,8 @@ function getPaymentCount(
 ){
 
     return Math.ceil(
-        loanAmount / monthlyPayment
+        loanAmount /
+        monthlyPayment
     );
 
 }
@@ -884,13 +970,15 @@ function formatPaymentPeriod(
 
 
     const monthText =
-        String(month + 1)
-        .padStart(2,"0");
+        String(
+            month + 1
+        ).padStart(2,"0");
 
 
     const lastDayText =
-        String(lastDay)
-        .padStart(2,"0");
+        String(
+            lastDay
+        ).padStart(2,"0");
 
 
     return `${year}/${monthText}/26〜${year}/${monthText}/${lastDayText}`;
@@ -910,6 +998,7 @@ function generatePayments(){
 
     const loanAmount =
         settings.loanAmount;
+
 
     const monthlyPayment =
         settings.monthlyPayment;
@@ -958,6 +1047,7 @@ function generatePayments(){
         const year =
             date.getFullYear();
 
+
         const month =
             date.getMonth();
 
@@ -967,7 +1057,8 @@ function generatePayments(){
 
 
         const remainingBefore =
-            loanAmount - paidBefore;
+            loanAmount -
+            paidBefore;
 
 
         const payment =
@@ -978,7 +1069,8 @@ function generatePayments(){
 
 
         const remainingAfter =
-            remainingBefore - payment;
+            remainingBefore -
+            payment;
 
 
         payments.push({
@@ -1039,41 +1131,6 @@ function getPaid(){
 
 
 /* =========================
-   返済チェック
-========================= */
-
-function togglePaid(number){
-
-    let paid =
-        getPaid();
-
-
-    if(paid.includes(number)){
-
-        paid =
-            paid.filter(
-                n => n !== number
-            );
-
-    }else{
-
-        paid.push(number);
-
-    }
-
-
-    localStorage.setItem(
-        "repaymentPaid",
-        JSON.stringify(paid)
-    );
-
-
-    render();
-
-}
-
-
-/* =========================
    今月返済した
 ========================= */
 
@@ -1117,7 +1174,7 @@ function payThisMonth(){
         generatePayments();
 
 
-    const paid =
+    let paid =
         getPaid();
 
 
@@ -1156,6 +1213,10 @@ function payThisMonth(){
     }
 
 
+    /*
+       返済済みに追加
+    */
+
     paid.push(
         currentPayment.number
     );
@@ -1176,6 +1237,108 @@ function payThisMonth(){
         "円\n\n" +
         "おつかれさま！👍"
     );
+
+}
+
+
+/* =========================
+   今月の状態表示
+========================= */
+
+function updateThisMonthStatus(){
+
+    const today =
+        new Date();
+
+
+    const year =
+        today.getFullYear();
+
+
+    const month =
+        today.getMonth();
+
+
+    const day =
+        today.getDate();
+
+
+    const payments =
+        generatePayments();
+
+
+    const paid =
+        getPaid();
+
+
+    const currentPayment =
+        payments.find(
+            payment =>
+                payment.year === year &&
+                payment.month === month
+        );
+
+
+    const button =
+        document.getElementById(
+            "thisMonthButton"
+        );
+
+
+    const monthPaid =
+        document.getElementById(
+            "monthPaid"
+        );
+
+
+    /*
+       今月分が返済済み
+    */
+
+    if(
+        currentPayment &&
+        paid.includes(
+            currentPayment.number
+        )
+    ){
+
+        button.style.display =
+            "none";
+
+        monthPaid.style.display =
+            "block";
+
+        return;
+
+    }
+
+
+    /*
+       まだ返済していない
+    */
+
+    button.style.display =
+        "block";
+
+    monthPaid.style.display =
+        "none";
+
+
+    /*
+       26日より前
+    */
+
+    if(day < 26){
+
+        button.textContent =
+            "⏳ 今月の返済期間前";
+
+    }else{
+
+        button.textContent =
+            "✅ 今月返済した！";
+
+    }
 
 }
 
@@ -1206,21 +1369,38 @@ function render(){
         payments.length;
 
 
+    /*
+       実際に存在する返済番号だけを
+       返済済みとして数える
+    */
+
+    const validPaid =
+        paid.filter(
+            number =>
+                payments.some(
+                    payment =>
+                        payment.number === number
+                )
+        );
+
+
     const paidCount =
-        paid.length;
+        validPaid.length;
 
 
     let remaining =
         total;
 
 
-    /* 返済済み分を計算 */
+    /*
+       返済済み分を計算
+    */
 
     payments.forEach(
         payment => {
 
             if(
-                paid.includes(
+                validPaid.includes(
                     payment.number
                 )
             ){
@@ -1246,7 +1426,8 @@ function render(){
     document.getElementById(
         "remainingAmount"
     ).textContent =
-        remaining.toLocaleString() + "円";
+        remaining.toLocaleString() +
+        "円";
 
 
     /* 残り回数 */
@@ -1261,7 +1442,8 @@ function render(){
     document.getElementById(
         "remainingCount"
     ).textContent =
-        remainingCount + "回";
+        remainingCount +
+        "回";
 
 
     /* 返済済み */
@@ -1269,7 +1451,8 @@ function render(){
     document.getElementById(
         "paidCount"
     ).textContent =
-        paidCount + "回";
+        paidCount +
+        "回";
 
 
     /* 進捗 */
@@ -1293,13 +1476,15 @@ function render(){
     document.getElementById(
         "progressPercent"
     ).textContent =
-        percent + "%";
+        percent +
+        "%";
 
 
     document.getElementById(
         "progressBar"
     ).style.width =
-        percent + "%";
+        percent +
+        "%";
 
 
     /* 完済メッセージ */
@@ -1324,7 +1509,10 @@ function render(){
     }
 
 
-    /* 返済リスト */
+    /* =========================
+       返済予定リスト
+       ※チェックボックスなし
+    ========================= */
 
     const list =
         document.getElementById(
@@ -1339,7 +1527,7 @@ function render(){
         payment => {
 
             const isPaid =
-                paid.includes(
+                validPaid.includes(
                     payment.number
                 );
 
@@ -1360,12 +1548,6 @@ function render(){
 
 
             item.innerHTML = `
-
-                <input
-                    type="checkbox"
-                    ${isPaid ? "checked" : ""}
-                    onchange="togglePaid(${payment.number})"
-                >
 
                 <div class="payment-number">
                     ${payment.number}
@@ -1399,10 +1581,19 @@ function render(){
             `;
 
 
-            list.appendChild(item);
+            list.appendChild(
+                item
+            );
 
         }
     );
+
+
+    /*
+       今月返済ボタンの状態更新
+    */
+
+    updateThisMonthStatus();
 
 }
 
@@ -1431,6 +1622,7 @@ function resetData(){
     localStorage.removeItem(
         "repaymentSettings"
     );
+
 
     localStorage.removeItem(
         "repaymentPaid"
