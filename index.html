@@ -237,25 +237,130 @@ button:active{
     margin-top:3px;
 }
 
-.warning{
-    background:#fff3cd;
-    color:#856404;
-    padding:12px;
-    border-radius:10px;
-    margin-top:10px;
-}
-
 .hidden{
     display:none;
 }
+
+
+/* =================================
+   完済花火
+================================= */
+
+#fireworksCanvas{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    z-index:9998;
+    pointer-events:none;
+    display:none;
+}
+
+#celebration{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    z-index:9999;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    pointer-events:none;
+}
+
+.celebration-message{
+    text-align:center;
+    font-weight:bold;
+    padding:25px;
+    animation:celebrationPop 0.8s ease-out;
+}
+
+.celebration-title{
+    font-size:46px;
+    color:#fff;
+    text-shadow:
+        0 0 5px #ff9800,
+        0 0 15px #ff9800,
+        0 0 30px #ff5722;
+    white-space:nowrap;
+}
+
+.celebration-sub{
+    font-size:30px;
+    color:#fff;
+    margin-top:12px;
+    text-shadow:
+        0 0 5px #2196f3,
+        0 0 15px #2196f3,
+        0 0 30px #03a9f4;
+}
+
+@keyframes celebrationPop{
+
+    0%{
+        transform:scale(0.2);
+        opacity:0;
+    }
+
+    70%{
+        transform:scale(1.15);
+        opacity:1;
+    }
+
+    100%{
+        transform:scale(1);
+        opacity:1;
+    }
+
+}
+
+@media(max-width:500px){
+
+    .celebration-title{
+        font-size:38px;
+    }
+
+    .celebration-sub{
+        font-size:25px;
+    }
+
+}
+
 </style>
 </head>
 
 <body>
 
+
+<!-- ==============================
+     完済花火
+============================== -->
+
+<canvas id="fireworksCanvas"></canvas>
+
+<div id="celebration">
+
+    <div class="celebration-message">
+
+        <div class="celebration-title">
+            🎉 完済しました！
+        </div>
+
+        <div class="celebration-sub">
+            お疲れさまでした！
+        </div>
+
+    </div>
+
+</div>
+
+
 <div class="container">
 
 <h1>💰 返済計画</h1>
+
 
 <!-- 設定 -->
 <div class="card">
@@ -263,20 +368,25 @@ button:active{
     <h2>⚙️ 返済設定</h2>
 
     <label>借入残高</label>
+
     <input
         type="number"
         id="loanAmount"
         placeholder="例：680000"
     >
 
+
     <label>毎月の返済額</label>
+
     <input
         type="number"
         id="monthlyPayment"
         placeholder="例：10000"
     >
 
+
     <label>初回返済月</label>
+
     <input
         type="month"
         id="startDate"
@@ -285,6 +395,7 @@ button:active{
     <div class="note">
         ※返済期間は毎月「26日〜月末」です
     </div>
+
 
     <button
         class="save-button"
@@ -304,51 +415,66 @@ button:active{
     <div class="info">
 
         <div class="info-box">
+
             <div class="info-label">
                 残り返済額
             </div>
+
             <div
                 class="info-value"
                 id="remainingAmount"
             >
                 0円
             </div>
+
         </div>
 
+
         <div class="info-box">
+
             <div class="info-label">
                 残り回数
             </div>
+
             <div
                 class="info-value"
                 id="remainingCount"
             >
                 0回
             </div>
+
         </div>
 
+
         <div class="info-box">
+
             <div class="info-label">
                 返済済み
             </div>
+
             <div
                 class="info-value"
                 id="paidCount"
             >
                 0回
             </div>
+
         </div>
 
+
         <div class="info-box">
+
             <div class="info-label">
                 全返済回数
             </div>
+
             <div
                 class="info-value"
                 id="totalCount"
             >
                 0回
             </div>
+
         </div>
 
     </div>
@@ -357,10 +483,12 @@ button:active{
     <div class="progress-area">
 
         <div class="progress-bar">
+
             <div
                 class="progress"
                 id="progress"
             ></div>
+
         </div>
 
         <div
@@ -400,10 +528,12 @@ button:active{
 <div class="card">
 
     <div class="schedule-header">
+
         <h2>📅 返済予定</h2>
+
     </div>
 
-    <!-- ここを押すと予定が開く -->
+
     <button
         class="schedule-toggle"
         id="scheduleToggle"
@@ -411,6 +541,7 @@ button:active{
     >
         📅 返済予定を見る
     </button>
+
 
     <div
         class="payment-list hidden"
@@ -437,42 +568,106 @@ button:active{
 
 <script>
 
+
+/* =================================
+   返済予定 開閉
+================================= */
+
 let scheduleOpen = false;
 
 
-/* 今日の日付 */
+function toggleSchedule(){
+
+    scheduleOpen =
+        !scheduleOpen;
+
+
+    const list =
+        document.getElementById(
+            "paymentList"
+        );
+
+
+    const button =
+        document.getElementById(
+            "scheduleToggle"
+        );
+
+
+    if(scheduleOpen){
+
+        list.classList.remove(
+            "hidden"
+        );
+
+        button.textContent =
+            "📅 返済予定を閉じる";
+
+    }else{
+
+        list.classList.add(
+            "hidden"
+        );
+
+        button.textContent =
+            "📅 返済予定を見る";
+
+    }
+
+}
+
+
+/* =================================
+   今日の日付
+================================= */
+
 function getToday(){
 
-    const today = new Date();
+    const today =
+        new Date();
 
     const year =
         today.getFullYear();
 
     const month =
-        String(today.getMonth() + 1)
-        .padStart(2,"0");
+        String(
+            today.getMonth() + 1
+        ).padStart(2,"0");
 
     const day =
-        String(today.getDate())
-        .padStart(2,"0");
+        String(
+            today.getDate()
+        ).padStart(2,"0");
+
 
     return `${year}-${month}-${day}`;
+
 }
 
 
-/* 初回返済月 */
+/* =================================
+   初回返済月
+================================= */
+
 function getDefaultStartMonth(){
 
-    const today = new Date();
+    const today =
+        new Date();
 
-    return `${today.getFullYear()}-${String(
-        today.getMonth() + 1
-    ).padStart(2,"0")}`;
+
+    return `${today.getFullYear()}-${
+        String(
+            today.getMonth() + 1
+        ).padStart(2,"0")
+    }`;
 
 }
 
 
-/* 初期化 */
+/* =================================
+   初期化
+================================= */
+
 function initialize(){
 
     const settings =
@@ -482,6 +677,7 @@ function initialize(){
             ) || "null"
         );
 
+
     if(settings){
 
         document.getElementById(
@@ -489,10 +685,12 @@ function initialize(){
         ).value =
             settings.loanAmount;
 
+
         document.getElementById(
             "monthlyPayment"
         ).value =
             settings.monthlyPayment;
+
 
         document.getElementById(
             "startDate"
@@ -508,12 +706,16 @@ function initialize(){
 
     }
 
+
     render();
 
 }
 
 
-/* 設定保存 */
+/* =================================
+   設定保存
+================================= */
+
 function saveSettings(){
 
     const loanAmount =
@@ -523,12 +725,14 @@ function saveSettings(){
             ).value
         );
 
+
     const monthlyPayment =
         Number(
             document.getElementById(
                 "monthlyPayment"
             ).value
         );
+
 
     const startDate =
         document.getElementById(
@@ -565,9 +769,11 @@ function saveSettings(){
     localStorage.setItem(
         "repaymentSettings",
         JSON.stringify({
+
             loanAmount,
             monthlyPayment,
             startDate
+
         })
     );
 
@@ -579,12 +785,18 @@ function saveSettings(){
 
     render();
 
-    alert("設定を保存しました！");
+
+    alert(
+        "設定を保存しました！"
+    );
 
 }
 
 
-/* 設定取得 */
+/* =================================
+   設定取得
+================================= */
+
 function getSettings(){
 
     return JSON.parse(
@@ -596,13 +808,22 @@ function getSettings(){
 }
 
 
-/* 返済回数 */
+/* =================================
+   返済回数
+================================= */
+
 function getPaymentCount(){
 
     const settings =
         getSettings();
 
-    if(!settings) return 0;
+
+    if(!settings){
+
+        return 0;
+
+    }
+
 
     return Math.ceil(
         settings.loanAmount /
@@ -612,7 +833,10 @@ function getPaymentCount(){
 }
 
 
-/* 月末 */
+/* =================================
+   月末
+================================= */
+
 function getLastDayOfMonth(
     year,
     month
@@ -627,7 +851,10 @@ function getLastDayOfMonth(
 }
 
 
-/* 返済期間表示 */
+/* =================================
+   返済期間
+================================= */
+
 function formatPaymentPeriod(
     year,
     month
@@ -638,6 +865,7 @@ function formatPaymentPeriod(
             year,
             month
         );
+
 
     return (
         year +
@@ -654,23 +882,38 @@ function formatPaymentPeriod(
 }
 
 
-/* 返済予定を作る */
+/* =================================
+   返済予定作成
+================================= */
+
 function generatePayments(){
 
     const settings =
         getSettings();
 
-    if(!settings) return [];
+
+    if(!settings){
+
+        return [];
+
+    }
+
 
     const totalCount =
         getPaymentCount();
 
-    const [startYear,startMonth] =
+
+    const [
+        startYear,
+        startMonth
+    ] =
         settings.startDate
         .split("-")
         .map(Number);
 
+
     const payments = [];
+
 
     let remaining =
         settings.loanAmount;
@@ -689,8 +932,10 @@ function generatePayments(){
                 1
             );
 
+
         const year =
             date.getFullYear();
+
 
         const month =
             date.getMonth() + 1;
@@ -703,12 +948,14 @@ function generatePayments(){
             );
 
 
-        remaining -= payment;
+        remaining -=
+            payment;
 
 
         payments.push({
 
-            number:i + 1,
+            number:
+                i + 1,
 
             year,
 
@@ -734,7 +981,10 @@ function generatePayments(){
 }
 
 
-/* 返済済み一覧 */
+/* =================================
+   返済済み取得
+================================= */
+
 function getPaid(){
 
     return JSON.parse(
@@ -746,11 +996,15 @@ function getPaid(){
 }
 
 
-/* 今月返済 */
+/* =================================
+   今月返済
+================================= */
+
 function payThisMonth(){
 
     const settings =
         getSettings();
+
 
     if(!settings){
 
@@ -766,11 +1020,11 @@ function payThisMonth(){
     const today =
         new Date();
 
+
     const day =
         today.getDate();
 
 
-    /* 26日より前 */
     if(day < 26){
 
         alert(
@@ -784,6 +1038,7 @@ function payThisMonth(){
 
     const year =
         today.getFullYear();
+
 
     const month =
         today.getMonth() + 1;
@@ -853,13 +1108,17 @@ function payThisMonth(){
 }
 
 
-/* 今月ボタン状態 */
+/* =================================
+   今月ボタン状態
+================================= */
+
 function updateThisMonthStatus(){
 
     const button =
         document.getElementById(
             "thisMonthButton"
         );
+
 
     const message =
         document.getElementById(
@@ -870,11 +1129,14 @@ function updateThisMonthStatus(){
     const settings =
         getSettings();
 
+
     if(!settings){
 
-        button.disabled = true;
+        button.disabled =
+            true;
 
-        message.textContent = "";
+        message.textContent =
+            "";
 
         return;
 
@@ -884,8 +1146,10 @@ function updateThisMonthStatus(){
     const today =
         new Date();
 
+
     const year =
         today.getFullYear();
+
 
     const month =
         today.getMonth() + 1;
@@ -905,12 +1169,14 @@ function updateThisMonthStatus(){
 
     if(!currentPayment){
 
-        button.disabled = true;
+        button.disabled =
+            true;
 
         button.textContent =
             "📅 今月の返済予定なし";
 
-        message.textContent = "";
+        message.textContent =
+            "";
 
         return;
 
@@ -927,7 +1193,8 @@ function updateThisMonthStatus(){
         )
     ){
 
-        button.disabled = true;
+        button.disabled =
+            true;
 
         button.textContent =
             "✅ 今月分は返済済みです！";
@@ -940,9 +1207,12 @@ function updateThisMonthStatus(){
     }
 
 
-    if(today.getDate() < 26){
+    if(
+        today.getDate() < 26
+    ){
 
-        button.disabled = true;
+        button.disabled =
+            true;
 
         button.textContent =
             "⏳ 今月の返済期間前";
@@ -955,62 +1225,479 @@ function updateThisMonthStatus(){
     }
 
 
-    button.disabled = false;
+    button.disabled =
+        false;
 
     button.textContent =
         "✅ 今月返済した！";
 
-    message.textContent = "";
+    message.textContent =
+        "";
 
 }
 
 
-/* 返済予定の開閉 */
-function toggleSchedule(){
+/* =================================
+   花火アニメーション
+================================= */
 
-    scheduleOpen =
-        !scheduleOpen;
+let fireworksAnimation = null;
 
 
-    const list =
+function launchFireworks(){
+
+    const canvas =
         document.getElementById(
-            "paymentList"
+            "fireworksCanvas"
         );
 
-    const button =
+
+    const celebration =
         document.getElementById(
-            "scheduleToggle"
+            "celebration"
         );
 
 
-    if(scheduleOpen){
+    const ctx =
+        canvas.getContext("2d");
 
-        list.classList.remove(
-            "hidden"
-        );
 
-        button.textContent =
-            "📅 返済予定を閉じる";
+    canvas.width =
+        window.innerWidth *
+        window.devicePixelRatio;
 
-    }else{
 
-        list.classList.add(
-            "hidden"
-        );
+    canvas.height =
+        window.innerHeight *
+        window.devicePixelRatio;
 
-        button.textContent =
-            "📅 返済予定を見る";
+
+    ctx.scale(
+        window.devicePixelRatio,
+        window.devicePixelRatio
+    );
+
+
+    const width =
+        window.innerWidth;
+
+
+    const height =
+        window.innerHeight;
+
+
+    canvas.style.display =
+        "block";
+
+
+    celebration.style.display =
+        "flex";
+
+
+    const particles = [];
+
+
+    const rockets = [];
+
+
+    let startTime =
+        Date.now();
+
+
+    const duration =
+        7000;
+
+
+    function randomColor(){
+
+        const colors = [
+
+            "#ff5252",
+            "#ffeb3b",
+            "#69f0ae",
+            "#40c4ff",
+            "#e040fb",
+            "#ff9800",
+            "#ffffff"
+
+        ];
+
+
+        return colors[
+            Math.floor(
+                Math.random() *
+                colors.length
+            )
+        ];
 
     }
 
+
+    function createRocket(){
+
+        rockets.push({
+
+            x:
+                Math.random() *
+                width,
+
+            y:
+                height + 10,
+
+            targetY:
+                height *
+                (
+                    0.15 +
+                    Math.random() *
+                    0.4
+                ),
+
+            speed:
+                7 +
+                Math.random() * 4,
+
+            color:
+                randomColor()
+
+        });
+
+    }
+
+
+    function explode(
+        x,
+        y,
+        color
+    ){
+
+        const count =
+            70 +
+            Math.floor(
+                Math.random() * 40
+            );
+
+
+        for(
+            let i = 0;
+            i < count;
+            i++
+        ){
+
+            const angle =
+                Math.random() *
+                Math.PI *
+                2;
+
+
+            const speed =
+                1.5 +
+                Math.random() * 5;
+
+
+            particles.push({
+
+                x,
+                y,
+
+                vx:
+                    Math.cos(angle) *
+                    speed,
+
+                vy:
+                    Math.sin(angle) *
+                    speed,
+
+                life:
+                    70 +
+                    Math.random() * 40,
+
+                maxLife:
+                    110,
+
+                size:
+                    1.5 +
+                    Math.random() * 2,
+
+                color
+
+            });
+
+        }
+
+    }
+
+
+    function animate(){
+
+        const now =
+            Date.now();
+
+
+        const elapsed =
+            now - startTime;
+
+
+        ctx.clearRect(
+            0,
+            0,
+            width,
+            height
+        );
+
+
+        /* ロケット */
+        for(
+            let i = rockets.length - 1;
+            i >= 0;
+            i--
+        ){
+
+            const rocket =
+                rockets[i];
+
+
+            rocket.y -=
+                rocket.speed;
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                rocket.x,
+                rocket.y,
+                2,
+                0,
+                Math.PI * 2
+            );
+
+            ctx.fillStyle =
+                rocket.color;
+
+            ctx.fill();
+
+
+            if(
+                rocket.y <=
+                rocket.targetY
+            ){
+
+                explode(
+                    rocket.x,
+                    rocket.y,
+                    rocket.color
+                );
+
+
+                rockets.splice(
+                    i,
+                    1
+                );
+
+            }
+
+        }
+
+
+        /* 粒 */
+        for(
+            let i = particles.length - 1;
+            i >= 0;
+            i--
+        ){
+
+            const p =
+                particles[i];
+
+
+            p.x +=
+                p.vx;
+
+
+            p.y +=
+                p.vy;
+
+
+            p.vy +=
+                0.045;
+
+
+            p.vx *=
+                0.985;
+
+
+            p.life -=
+                1;
+
+
+            const alpha =
+                Math.max(
+                    0,
+                    p.life /
+                    p.maxLife
+                );
+
+
+            ctx.globalAlpha =
+                alpha;
+
+
+            ctx.beginPath();
+
+            ctx.arc(
+                p.x,
+                p.y,
+                p.size,
+                0,
+                Math.PI * 2
+            );
+
+
+            ctx.fillStyle =
+                p.color;
+
+
+            ctx.fill();
+
+
+            if(
+                p.life <= 0
+            ){
+
+                particles.splice(
+                    i,
+                    1
+                );
+
+            }
+
+        }
+
+
+        ctx.globalAlpha =
+            1;
+
+
+        /* 次の花火 */
+        if(
+            elapsed < duration
+        ){
+
+            if(
+                Math.random() < 0.07
+            ){
+
+                createRocket();
+
+            }
+
+            fireworksAnimation =
+                requestAnimationFrame(
+                    animate
+                );
+
+        }else{
+
+            finishFireworks();
+
+        }
+
+    }
+
+
+    /* 最初から何発か */
+    for(
+        let i = 0;
+        i < 3;
+        i++
+    ){
+
+        setTimeout(
+            createRocket,
+            i * 400
+        );
+
+    }
+
+
+    animate();
+
 }
 
 
-/* 画面表示 */
+/* =================================
+   花火終了
+================================= */
+
+function finishFireworks(){
+
+    const canvas =
+        document.getElementById(
+            "fireworksCanvas"
+        );
+
+
+    const celebration =
+        document.getElementById(
+            "celebration"
+        );
+
+
+    cancelAnimationFrame(
+        fireworksAnimation
+    );
+
+
+    canvas.style.display =
+        "none";
+
+
+    celebration.style.display =
+        "none";
+
+}
+
+
+/* =================================
+   完済判定
+================================= */
+
+let previousComplete =
+    false;
+
+
+function checkCompletion(
+    remainingAmount
+){
+
+    const isComplete =
+        remainingAmount <= 0;
+
+
+    if(
+        isComplete &&
+        !previousComplete
+    ){
+
+        launchFireworks();
+
+    }
+
+
+    previousComplete =
+        isComplete;
+
+}
+
+
+/* =================================
+   画面表示
+================================= */
+
 function render(){
 
     const settings =
         getSettings();
+
 
     if(!settings){
 
@@ -1019,34 +1706,61 @@ function render(){
         ).textContent =
             "0円";
 
+
         document.getElementById(
             "remainingCount"
         ).textContent =
             "0回";
+
 
         document.getElementById(
             "paidCount"
         ).textContent =
             "0回";
 
+
         document.getElementById(
             "totalCount"
         ).textContent =
             "0回";
+
 
         document.getElementById(
             "progress"
         ).style.width =
             "0%";
 
+
         document.getElementById(
             "progressText"
         ).textContent =
             "0%";
 
+
         document.getElementById(
             "paymentList"
-        ).innerHTML = "";
+        ).innerHTML =
+            "";
+
+
+        const complete =
+            document.getElementById(
+                "completeMessage"
+            );
+
+
+        if(complete){
+
+            complete.classList.add(
+                "hidden"
+            );
+
+        }
+
+
+        previousComplete =
+            false;
+
 
         updateThisMonthStatus();
 
@@ -1058,12 +1772,14 @@ function render(){
     const payments =
         generatePayments();
 
+
     const paid =
         getPaid();
 
 
     const totalCount =
         payments.length;
+
 
     const paidCount =
         paid.length;
@@ -1091,6 +1807,13 @@ function render(){
     );
 
 
+    remainingAmount =
+        Math.max(
+            0,
+            remainingAmount
+        );
+
+
     const remainingCount =
         Math.max(
             0,
@@ -1100,23 +1823,24 @@ function render(){
 
     const progress =
         settings.loanAmount > 0
-        ? (
+        ?
+        (
             (
                 settings.loanAmount -
                 remainingAmount
-            ) /
+            )
+            /
             settings.loanAmount
-        ) * 100
-        : 0;
+        )
+        * 100
+        :
+        0;
 
 
     document.getElementById(
         "remainingAmount"
     ).textContent =
-        Math.max(
-            0,
-            remainingAmount
-        ).toLocaleString() +
+        remainingAmount.toLocaleString() +
         "円";
 
 
@@ -1170,13 +1894,15 @@ function render(){
 
 
     /* 返済予定 */
+
     const list =
         document.getElementById(
             "paymentList"
         );
 
 
-    list.innerHTML = "";
+    list.innerHTML =
+        "";
 
 
     payments.forEach(
@@ -1225,12 +1951,14 @@ function render(){
 
                     ${
                         isPaid
-                        ? `
+                        ?
+                        `
                         <div class="paid-mark">
                             ✓ 返済済み
                         </div>
                         `
-                        : ""
+                        :
+                        ""
                     }
 
                 </div>
@@ -1238,13 +1966,16 @@ function render(){
             `;
 
 
-            list.appendChild(item);
+            list.appendChild(
+                item
+            );
 
         }
     );
 
 
-    /* 完済表示 */
+    /* 完済メッセージ */
+
     let complete =
         document.getElementById(
             "completeMessage"
@@ -1258,8 +1989,10 @@ function render(){
                 "div"
             );
 
+
         complete.id =
             "completeMessage";
+
 
         complete.className =
             "complete";
@@ -1285,6 +2018,7 @@ function render(){
             "hidden"
         );
 
+
         complete.textContent =
             "🎉 完済しました！お疲れさまでした！";
 
@@ -1297,12 +2031,22 @@ function render(){
     }
 
 
+    /* 完済した瞬間に花火 */
+
+    checkCompletion(
+        remainingAmount
+    );
+
+
     updateThisMonthStatus();
 
 }
 
 
-/* データリセット */
+/* =================================
+   データリセット
+================================= */
+
 function resetData(){
 
     const result =
@@ -1311,25 +2055,39 @@ function resetData(){
         );
 
 
-    if(!result) return;
+    if(!result){
+
+        return;
+
+    }
 
 
     localStorage.removeItem(
         "repaymentSettings"
     );
 
+
     localStorage.removeItem(
         "repaymentPaid"
     );
 
 
-    scheduleOpen = false;
+    scheduleOpen =
+        false;
+
+
+    previousComplete =
+        false;
+
+
+    finishFireworks();
 
 
     const list =
         document.getElementById(
             "paymentList"
         );
+
 
     const button =
         document.getElementById(
@@ -1341,18 +2099,21 @@ function resetData(){
         "hidden"
     );
 
+
     button.textContent =
         "📅 返済予定を見る";
 
 
     document.getElementById(
         "loanAmount"
-    ).value = "";
+    ).value =
+        "";
 
 
     document.getElementById(
         "monthlyPayment"
-    ).value = "";
+    ).value =
+        "";
 
 
     document.getElementById(
@@ -1366,7 +2127,10 @@ function resetData(){
 }
 
 
-/* 起動 */
+/* =================================
+   起動
+================================= */
+
 initialize();
 
 </script>
