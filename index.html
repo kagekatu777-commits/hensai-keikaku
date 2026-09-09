@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -161,6 +160,25 @@ button{
     width:100%;
     background:#e53935;
     color:white;
+}
+
+/* 今月返済ボタン */
+
+.this-month-button{
+    width:100%;
+    background:#2e7d32;
+    color:white;
+    font-size:18px;
+    font-weight:bold;
+    padding:16px;
+    margin-bottom:12px;
+}
+
+.this-month-note{
+    text-align:center;
+    font-size:12px;
+    color:#777;
+    margin:0 0 15px;
 }
 
 /* 返済予定 */
@@ -417,13 +435,17 @@ button{
         <div class="input-group">
 
             <label>
-                初回返済日
+                初回返済月
             </label>
 
             <input
-                type="date"
+                type="month"
                 id="startDate"
             >
+
+            <div class="note">
+                ※返済期間は毎月「26日〜月末」です
+            </div>
 
         </div>
 
@@ -434,6 +456,26 @@ button{
         >
             💾 返済計画を作成・更新
         </button>
+
+    </div>
+
+
+    <!-- 今月の返済 -->
+
+    <div class="card">
+
+        <h2>💴 今月の返済</h2>
+
+        <button
+            class="this-month-button"
+            onclick="payThisMonth()"
+        >
+            ✅ 今月返済した！
+        </button>
+
+        <p class="this-month-note">
+            給料から1万円が天引きされたら押してください
+        </p>
 
     </div>
 
@@ -564,6 +606,26 @@ function getToday(){
 
 
 /* =========================
+   初回返済月を取得
+========================= */
+
+function getDefaultStartMonth(){
+
+    const today = new Date();
+
+    const year =
+        today.getFullYear();
+
+    const month =
+        String(today.getMonth() + 1)
+        .padStart(2, "0");
+
+    return `${year}-${month}`;
+
+}
+
+
+/* =========================
    初期表示
 ========================= */
 
@@ -583,8 +645,31 @@ function initialize(){
         document.getElementById("monthlyPayment").value =
             settings.monthlyPayment;
 
+
+        /*
+
+           以前の日付形式
+           2026-09-09
+
+           でも保存されている場合、
+           2026-09だけを取り出す
+
+        */
+
+        let startMonth =
+            settings.startDate || "";
+
+
+        if(startMonth.length >= 7){
+
+            startMonth =
+                startMonth.substring(0,7);
+
+        }
+
+
         document.getElementById("startDate").value =
-            settings.startDate;
+            startMonth;
 
     }else{
 
@@ -595,7 +680,7 @@ function initialize(){
             DEFAULT_MONTHLY;
 
         document.getElementById("startDate").value =
-            getToday();
+            getDefaultStartMonth();
 
     }
 
@@ -642,7 +727,7 @@ function saveSettings(){
 
     if(!startDate){
 
-        alert("初回返済日を入力してください。");
+        alert("初回返済月を入力してください。");
 
         return;
     }
@@ -665,9 +750,6 @@ function saveSettings(){
     );
 
 
-    /* 設定を変更した場合、
-       返済チェックを一度リセット */
-
     const answer =
         confirm(
             "返済設定を更新しました。\n\n" +
@@ -687,6 +769,7 @@ function saveSettings(){
     render();
 
     alert("返済計画を更新しました！");
+
 }
 
 
@@ -702,18 +785,48 @@ function getSettings(){
 
     if(saved){
 
-        return JSON.parse(saved);
+        const settings =
+            JSON.parse(saved);
+
+
+        let startDate =
+            settings.startDate || "";
+
+
+        if(startDate.length >= 7){
+
+            startDate =
+                startDate.substring(0,7);
+
+        }
+
+
+        return {
+
+            loanAmount:
+                Number(settings.loanAmount),
+
+            monthlyPayment:
+                Number(settings.monthlyPayment),
+
+            startDate:
+                startDate
+
+        };
 
     }
 
 
     return {
 
-        loanAmount: DEFAULT_LOAN,
+        loanAmount:
+            DEFAULT_LOAN,
 
-        monthlyPayment: DEFAULT_MONTHLY,
+        monthlyPayment:
+            DEFAULT_MONTHLY,
 
-        startDate: getToday()
+        startDate:
+            getDefaultStartMonth()
 
     };
 
@@ -737,37 +850,50 @@ function getPaymentCount(
 
 
 /* =========================
-   日付フォーマット
+   月末の日付
 ========================= */
 
-function formatDate(date){
+function getLastDayOfMonth(
+    year,
+    month
+){
 
-    const y =
-        date.getFullYear();
+    return new Date(
+        year,
+        month + 1,
+        0
+    ).getDate();
 
-    const m =
-        String(
-            date.getMonth() + 1
-        ).padStart(2, "0");
-
-    const d =
-        String(
-            date.getDate()
-        ).padStart(2, "0");
+}
 
 
-    const week = [
-        "日",
-        "月",
-        "火",
-        "水",
-        "木",
-        "金",
-        "土"
-    ];
+/* =========================
+   返済期間表示
+========================= */
+
+function formatPaymentPeriod(
+    year,
+    month
+){
+
+    const lastDay =
+        getLastDayOfMonth(
+            year,
+            month
+        );
 
 
-    return `${y}/${m}/${d}（${week[date.getDay()]}）`;
+    const monthText =
+        String(month + 1)
+        .padStart(2,"0");
+
+
+    const lastDayText =
+        String(lastDay)
+        .padStart(2,"0");
+
+
+    return `${year}/${monthText}/26〜${year}/${monthText}/${lastDayText}`;
 
 }
 
@@ -788,9 +914,20 @@ function generatePayments(){
     const monthlyPayment =
         settings.monthlyPayment;
 
-    const startDate =
-        new Date(
-            settings.startDate + "T00:00:00"
+
+    const startMonth =
+        settings.startDate;
+
+
+    const startYear =
+        Number(
+            startMonth.substring(0,4)
+        );
+
+
+    const startMonthNumber =
+        Number(
+            startMonth.substring(5,7)
         );
 
 
@@ -811,12 +948,18 @@ function generatePayments(){
     ){
 
         const date =
-            new Date(startDate);
+            new Date(
+                startYear,
+                startMonthNumber - 1 + i,
+                1
+            );
 
 
-        date.setMonth(
-            date.getMonth() + i
-        );
+        const year =
+            date.getFullYear();
+
+        const month =
+            date.getMonth();
 
 
         const paidBefore =
@@ -840,13 +983,26 @@ function generatePayments(){
 
         payments.push({
 
-            number: i + 1,
+            number:
+                i + 1,
 
-            date: date,
+            year:
+                year,
 
-            payment: payment,
+            month:
+                month,
 
-            remaining: remainingAfter
+            period:
+                formatPaymentPeriod(
+                    year,
+                    month
+                ),
+
+            payment:
+                payment,
+
+            remaining:
+                remainingAfter
 
         });
 
@@ -913,6 +1069,113 @@ function togglePaid(number){
 
 
     render();
+
+}
+
+
+/* =========================
+   今月返済した
+========================= */
+
+function payThisMonth(){
+
+    const today =
+        new Date();
+
+
+    const todayYear =
+        today.getFullYear();
+
+
+    const todayMonth =
+        today.getMonth();
+
+
+    const todayDay =
+        today.getDate();
+
+
+    /*
+       返済期間は26日〜月末
+    */
+
+    if(todayDay < 26){
+
+        alert(
+            "今月の返済期間は\n" +
+            "26日〜月末です。\n\n" +
+            "給料から天引きされたら\n" +
+            "「今月返済した！」を押してください。"
+        );
+
+        return;
+
+    }
+
+
+    const payments =
+        generatePayments();
+
+
+    const paid =
+        getPaid();
+
+
+    const currentPayment =
+        payments.find(
+            payment =>
+                payment.year === todayYear &&
+                payment.month === todayMonth
+        );
+
+
+    if(!currentPayment){
+
+        alert(
+            "今月の返済予定が見つかりません。"
+        );
+
+        return;
+
+    }
+
+
+    if(
+        paid.includes(
+            currentPayment.number
+        )
+    ){
+
+        alert(
+            "今月分はすでに\n" +
+            "返済済みになっています。"
+        );
+
+        return;
+
+    }
+
+
+    paid.push(
+        currentPayment.number
+    );
+
+
+    localStorage.setItem(
+        "repaymentPaid",
+        JSON.stringify(paid)
+    );
+
+
+    render();
+
+
+    alert(
+        "今月分の返済を記録しました！\n\n" +
+        currentPayment.payment.toLocaleString() +
+        "円\n\n" +
+        "おつかれさま！👍"
+    );
 
 }
 
@@ -989,7 +1252,10 @@ function render(){
     /* 残り回数 */
 
     const remainingCount =
-        totalCount - paidCount;
+        Math.max(
+            0,
+            totalCount - paidCount
+        );
 
 
     document.getElementById(
@@ -1108,7 +1374,7 @@ function render(){
                 <div class="payment-date">
 
                     <div class="date">
-                        ${formatDate(payment.date)}
+                        ${payment.period}
                     </div>
 
                     <div class="remaining">
@@ -1186,7 +1452,7 @@ function resetData(){
     document.getElementById(
         "startDate"
     ).value =
-        getToday();
+        getDefaultStartMonth();
 
 
     render();
