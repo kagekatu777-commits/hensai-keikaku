@@ -1,1 +1,1211 @@
 
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="theme-color" content="#1976d2">
+
+<title>返済計画</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    padding:15px;
+    font-family:sans-serif;
+    background:#f3f6f9;
+    color:#333;
+}
+
+.container{
+    max-width:600px;
+    margin:0 auto;
+}
+
+/* ヘッダー */
+
+.header{
+    background:#1976d2;
+    color:white;
+    padding:20px 15px;
+    border-radius:15px;
+    text-align:center;
+    margin-bottom:15px;
+    box-shadow:0 3px 10px rgba(0,0,0,0.15);
+}
+
+.header h1{
+    margin:0;
+    font-size:25px;
+}
+
+.header p{
+    margin:7px 0 0;
+    font-size:14px;
+}
+
+/* カード */
+
+.card{
+    background:white;
+    border-radius:15px;
+    padding:18px;
+    margin-bottom:15px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+
+.card h2{
+    margin:0 0 15px;
+    font-size:19px;
+}
+
+/* 金額表示 */
+
+.main-amount{
+    text-align:center;
+    padding:10px 0 18px;
+}
+
+.main-amount .label{
+    font-size:14px;
+    color:#777;
+}
+
+.main-amount .amount{
+    font-size:36px;
+    font-weight:bold;
+    color:#1976d2;
+    margin-top:5px;
+}
+
+/* 情報 */
+
+.info-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
+.info-box{
+    background:#f5f7fa;
+    border-radius:10px;
+    padding:13px;
+    text-align:center;
+}
+
+.info-box .label{
+    font-size:13px;
+    color:#777;
+}
+
+.info-box .value{
+    font-size:21px;
+    font-weight:bold;
+    margin-top:5px;
+}
+
+/* 入力 */
+
+.input-group{
+    margin-bottom:15px;
+}
+
+.input-group label{
+    display:block;
+    font-weight:bold;
+    margin-bottom:7px;
+}
+
+.input-group input{
+    width:100%;
+    padding:13px;
+    font-size:17px;
+    border:1px solid #ccc;
+    border-radius:9px;
+}
+
+.input-group input:focus{
+    outline:none;
+    border-color:#1976d2;
+}
+
+/* ボタン */
+
+button{
+    border:none;
+    border-radius:9px;
+    padding:13px 16px;
+    font-size:16px;
+    cursor:pointer;
+}
+
+.primary{
+    width:100%;
+    background:#1976d2;
+    color:white;
+}
+
+.secondary{
+    width:100%;
+    background:#e8edf2;
+    color:#333;
+}
+
+.danger{
+    width:100%;
+    background:#e53935;
+    color:white;
+}
+
+/* 返済予定 */
+
+.schedule-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.schedule-header h2{
+    margin:0;
+}
+
+.progress-area{
+    margin:15px 0;
+}
+
+.progress-text{
+    display:flex;
+    justify-content:space-between;
+    font-size:13px;
+    margin-bottom:6px;
+}
+
+.progress{
+    width:100%;
+    height:14px;
+    background:#e0e0e0;
+    border-radius:10px;
+    overflow:hidden;
+}
+
+.progress-bar{
+    height:100%;
+    width:0%;
+    background:#1976d2;
+    transition:width 0.3s;
+}
+
+/* 返済リスト */
+
+.payment-list{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.payment-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px;
+    border-radius:10px;
+    background:#f5f7fa;
+    border:1px solid #eee;
+}
+
+.payment-item.paid{
+    background:#e8f5e9;
+}
+
+.payment-item input{
+    width:22px;
+    height:22px;
+    flex-shrink:0;
+}
+
+.payment-number{
+    width:42px;
+    font-weight:bold;
+    color:#777;
+}
+
+.payment-date{
+    flex:1;
+}
+
+.payment-date .date{
+    font-weight:bold;
+}
+
+.payment-date .remaining{
+    font-size:12px;
+    color:#777;
+    margin-top:3px;
+}
+
+.payment-money{
+    font-weight:bold;
+    white-space:nowrap;
+}
+
+.paid-mark{
+    color:#2e7d32;
+    font-size:12px;
+    font-weight:bold;
+}
+
+/* 最終メッセージ */
+
+.complete{
+    display:none;
+    text-align:center;
+    padding:20px;
+    background:#e8f5e9;
+    color:#2e7d32;
+    border-radius:12px;
+    font-weight:bold;
+    margin-bottom:15px;
+}
+
+.note{
+    font-size:12px;
+    color:#777;
+    line-height:1.6;
+}
+
+.footer{
+    text-align:center;
+    color:#999;
+    font-size:12px;
+    padding:15px 0 30px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <div class="header">
+        <h1>💰 返済計画</h1>
+        <p>無利息・毎月コツコツ返済</p>
+    </div>
+
+
+    <!-- 現在の残高 -->
+
+    <div class="card">
+
+        <div class="main-amount">
+
+            <div class="label">
+                現在の残り返済額
+            </div>
+
+            <div class="amount" id="remainingAmount">
+                680,000円
+            </div>
+
+        </div>
+
+
+        <div class="info-grid">
+
+            <div class="info-box">
+
+                <div class="label">
+                    借入金額
+                </div>
+
+                <div class="value">
+                    680,000円
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    毎月返済
+                </div>
+
+                <div class="value">
+                    10,000円
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    残り回数
+                </div>
+
+                <div class="value" id="remainingCount">
+                    68回
+                </div>
+
+            </div>
+
+
+            <div class="info-box">
+
+                <div class="label">
+                    返済済み
+                </div>
+
+                <div class="value" id="paidCount">
+                    0回
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- 設定 -->
+
+    <div class="card">
+
+        <h2>⚙️ 返済設定</h2>
+
+
+        <div class="input-group">
+
+            <label>
+                借入金額
+            </label>
+
+            <input
+                type="number"
+                id="loanAmount"
+                value="680000"
+                min="0"
+            >
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                毎月の返済額
+            </label>
+
+            <input
+                type="number"
+                id="monthlyPayment"
+                value="10000"
+                min="1"
+            >
+
+        </div>
+
+
+        <div class="input-group">
+
+            <label>
+                初回返済日
+            </label>
+
+            <input
+                type="date"
+                id="startDate"
+            >
+
+        </div>
+
+
+        <button
+            class="primary"
+            onclick="saveSettings()"
+        >
+            💾 返済計画を作成・更新
+        </button>
+
+    </div>
+
+
+    <!-- 進捗 -->
+
+    <div class="card">
+
+        <h2>📊 返済進捗</h2>
+
+        <div class="progress-area">
+
+            <div class="progress-text">
+
+                <span id="progressLeft">
+                    0回 / 68回
+                </span>
+
+                <span id="progressPercent">
+                    0%
+                </span>
+
+            </div>
+
+            <div class="progress">
+
+                <div
+                    class="progress-bar"
+                    id="progressBar"
+                ></div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- 完済 -->
+
+    <div
+        class="complete"
+        id="completeMessage"
+    >
+        🎉 完済おめでとう！<br>
+        返済がすべて完了しました！
+    </div>
+
+
+    <!-- 返済予定 -->
+
+    <div class="card">
+
+        <div class="schedule-header">
+
+            <h2>📅 返済予定</h2>
+
+        </div>
+
+        <div
+            class="payment-list"
+            id="paymentList"
+        ></div>
+
+    </div>
+
+
+    <!-- リセット -->
+
+    <div class="card">
+
+        <h2>🔧 データ管理</h2>
+
+        <p class="note">
+            返済済みのチェック状態や返済設定は、
+            このスマホのブラウザに保存されます。
+        </p>
+
+        <br>
+
+        <button
+            class="danger"
+            onclick="resetData()"
+        >
+            🗑️ すべてリセット
+        </button>
+
+    </div>
+
+
+    <div class="footer">
+        返済計画アプリ
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================
+   初期設定
+========================= */
+
+const DEFAULT_LOAN = 680000;
+const DEFAULT_MONTHLY = 10000;
+
+
+/* =========================
+   今日の日付
+========================= */
+
+function getToday(){
+
+    const today = new Date();
+
+    const year = today.getFullYear();
+
+    const month =
+        String(today.getMonth() + 1)
+        .padStart(2, "0");
+
+    const day =
+        String(today.getDate())
+        .padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+}
+
+
+/* =========================
+   初期表示
+========================= */
+
+function initialize(){
+
+    const saved =
+        localStorage.getItem("repaymentSettings");
+
+    if(saved){
+
+        const settings =
+            JSON.parse(saved);
+
+        document.getElementById("loanAmount").value =
+            settings.loanAmount;
+
+        document.getElementById("monthlyPayment").value =
+            settings.monthlyPayment;
+
+        document.getElementById("startDate").value =
+            settings.startDate;
+
+    }else{
+
+        document.getElementById("loanAmount").value =
+            DEFAULT_LOAN;
+
+        document.getElementById("monthlyPayment").value =
+            DEFAULT_MONTHLY;
+
+        document.getElementById("startDate").value =
+            getToday();
+
+    }
+
+    render();
+
+}
+
+
+/* =========================
+   設定保存
+========================= */
+
+function saveSettings(){
+
+    const loanAmount =
+        Number(
+            document.getElementById("loanAmount").value
+        );
+
+    const monthlyPayment =
+        Number(
+            document.getElementById("monthlyPayment").value
+        );
+
+    const startDate =
+        document.getElementById("startDate").value;
+
+
+    if(loanAmount <= 0){
+
+        alert("借入金額を入力してください。");
+
+        return;
+    }
+
+
+    if(monthlyPayment <= 0){
+
+        alert("毎月の返済額を入力してください。");
+
+        return;
+    }
+
+
+    if(!startDate){
+
+        alert("初回返済日を入力してください。");
+
+        return;
+    }
+
+
+    const settings = {
+
+        loanAmount: loanAmount,
+
+        monthlyPayment: monthlyPayment,
+
+        startDate: startDate
+
+    };
+
+
+    localStorage.setItem(
+        "repaymentSettings",
+        JSON.stringify(settings)
+    );
+
+
+    /* 設定を変更した場合、
+       返済チェックを一度リセット */
+
+    const answer =
+        confirm(
+            "返済設定を更新しました。\n\n" +
+            "返済済みチェックをリセットしますか？"
+        );
+
+
+    if(answer){
+
+        localStorage.removeItem(
+            "repaymentPaid"
+        );
+
+    }
+
+
+    render();
+
+    alert("返済計画を更新しました！");
+}
+
+
+/* =========================
+   設定取得
+========================= */
+
+function getSettings(){
+
+    const saved =
+        localStorage.getItem("repaymentSettings");
+
+
+    if(saved){
+
+        return JSON.parse(saved);
+
+    }
+
+
+    return {
+
+        loanAmount: DEFAULT_LOAN,
+
+        monthlyPayment: DEFAULT_MONTHLY,
+
+        startDate: getToday()
+
+    };
+
+}
+
+
+/* =========================
+   返済回数
+========================= */
+
+function getPaymentCount(
+    loanAmount,
+    monthlyPayment
+){
+
+    return Math.ceil(
+        loanAmount / monthlyPayment
+    );
+
+}
+
+
+/* =========================
+   日付フォーマット
+========================= */
+
+function formatDate(date){
+
+    const y =
+        date.getFullYear();
+
+    const m =
+        String(
+            date.getMonth() + 1
+        ).padStart(2, "0");
+
+    const d =
+        String(
+            date.getDate()
+        ).padStart(2, "0");
+
+
+    const week = [
+        "日",
+        "月",
+        "火",
+        "水",
+        "木",
+        "金",
+        "土"
+    ];
+
+
+    return `${y}/${m}/${d}（${week[date.getDay()]}）`;
+
+}
+
+
+/* =========================
+   返済予定作成
+========================= */
+
+function generatePayments(){
+
+    const settings =
+        getSettings();
+
+
+    const loanAmount =
+        settings.loanAmount;
+
+    const monthlyPayment =
+        settings.monthlyPayment;
+
+    const startDate =
+        new Date(
+            settings.startDate + "T00:00:00"
+        );
+
+
+    const count =
+        getPaymentCount(
+            loanAmount,
+            monthlyPayment
+        );
+
+
+    const payments = [];
+
+
+    for(
+        let i = 0;
+        i < count;
+        i++
+    ){
+
+        const date =
+            new Date(startDate);
+
+
+        date.setMonth(
+            date.getMonth() + i
+        );
+
+
+        const paidBefore =
+            i * monthlyPayment;
+
+
+        const remainingBefore =
+            loanAmount - paidBefore;
+
+
+        const payment =
+            Math.min(
+                monthlyPayment,
+                remainingBefore
+            );
+
+
+        const remainingAfter =
+            remainingBefore - payment;
+
+
+        payments.push({
+
+            number: i + 1,
+
+            date: date,
+
+            payment: payment,
+
+            remaining: remainingAfter
+
+        });
+
+    }
+
+
+    return payments;
+
+}
+
+
+/* =========================
+   返済済みデータ
+========================= */
+
+function getPaid(){
+
+    const saved =
+        localStorage.getItem(
+            "repaymentPaid"
+        );
+
+
+    if(saved){
+
+        return JSON.parse(saved);
+
+    }
+
+
+    return [];
+
+}
+
+
+/* =========================
+   返済チェック
+========================= */
+
+function togglePaid(number){
+
+    let paid =
+        getPaid();
+
+
+    if(paid.includes(number)){
+
+        paid =
+            paid.filter(
+                n => n !== number
+            );
+
+    }else{
+
+        paid.push(number);
+
+    }
+
+
+    localStorage.setItem(
+        "repaymentPaid",
+        JSON.stringify(paid)
+    );
+
+
+    render();
+
+}
+
+
+/* =========================
+   メイン表示
+========================= */
+
+function render(){
+
+    const settings =
+        getSettings();
+
+
+    const payments =
+        generatePayments();
+
+
+    const paid =
+        getPaid();
+
+
+    const total =
+        settings.loanAmount;
+
+
+    const totalCount =
+        payments.length;
+
+
+    const paidCount =
+        paid.length;
+
+
+    let remaining =
+        total;
+
+
+    /* 返済済み分を計算 */
+
+    payments.forEach(
+        payment => {
+
+            if(
+                paid.includes(
+                    payment.number
+                )
+            ){
+
+                remaining -=
+                    payment.payment;
+
+            }
+
+        }
+    );
+
+
+    if(remaining < 0){
+
+        remaining = 0;
+
+    }
+
+
+    /* 残高 */
+
+    document.getElementById(
+        "remainingAmount"
+    ).textContent =
+        remaining.toLocaleString() + "円";
+
+
+    /* 残り回数 */
+
+    const remainingCount =
+        totalCount - paidCount;
+
+
+    document.getElementById(
+        "remainingCount"
+    ).textContent =
+        remainingCount + "回";
+
+
+    /* 返済済み */
+
+    document.getElementById(
+        "paidCount"
+    ).textContent =
+        paidCount + "回";
+
+
+    /* 進捗 */
+
+    const percent =
+        totalCount === 0
+        ? 0
+        : Math.round(
+            paidCount /
+            totalCount *
+            100
+        );
+
+
+    document.getElementById(
+        "progressLeft"
+    ).textContent =
+        `${paidCount}回 / ${totalCount}回`;
+
+
+    document.getElementById(
+        "progressPercent"
+    ).textContent =
+        percent + "%";
+
+
+    document.getElementById(
+        "progressBar"
+    ).style.width =
+        percent + "%";
+
+
+    /* 完済メッセージ */
+
+    if(
+        remaining <= 0 ||
+        paidCount >= totalCount
+    ){
+
+        document.getElementById(
+            "completeMessage"
+        ).style.display =
+            "block";
+
+    }else{
+
+        document.getElementById(
+            "completeMessage"
+        ).style.display =
+            "none";
+
+    }
+
+
+    /* 返済リスト */
+
+    const list =
+        document.getElementById(
+            "paymentList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    payments.forEach(
+        payment => {
+
+            const isPaid =
+                paid.includes(
+                    payment.number
+                );
+
+
+            const item =
+                document.createElement(
+                    "div"
+                );
+
+
+            item.className =
+                "payment-item" +
+                (
+                    isPaid
+                    ? " paid"
+                    : ""
+                );
+
+
+            item.innerHTML = `
+
+                <input
+                    type="checkbox"
+                    ${isPaid ? "checked" : ""}
+                    onchange="togglePaid(${payment.number})"
+                >
+
+                <div class="payment-number">
+                    ${payment.number}
+                </div>
+
+                <div class="payment-date">
+
+                    <div class="date">
+                        ${formatDate(payment.date)}
+                    </div>
+
+                    <div class="remaining">
+                        返済後残高：
+                        ${payment.remaining.toLocaleString()}円
+                    </div>
+
+                </div>
+
+                <div class="payment-money">
+
+                    ${payment.payment.toLocaleString()}円
+
+                    ${
+                        isPaid
+                        ? '<div class="paid-mark">返済済み</div>'
+                        : ''
+                    }
+
+                </div>
+
+            `;
+
+
+            list.appendChild(item);
+
+        }
+    );
+
+}
+
+
+/* =========================
+   データリセット
+========================= */
+
+function resetData(){
+
+    const answer =
+        confirm(
+            "返済設定と返済済みデータを\n" +
+            "すべて削除します。\n\n" +
+            "本当にリセットしますか？"
+        );
+
+
+    if(!answer){
+
+        return;
+
+    }
+
+
+    localStorage.removeItem(
+        "repaymentSettings"
+    );
+
+    localStorage.removeItem(
+        "repaymentPaid"
+    );
+
+
+    document.getElementById(
+        "loanAmount"
+    ).value =
+        DEFAULT_LOAN;
+
+
+    document.getElementById(
+        "monthlyPayment"
+    ).value =
+        DEFAULT_MONTHLY;
+
+
+    document.getElementById(
+        "startDate"
+    ).value =
+        getToday();
+
+
+    render();
+
+
+    alert(
+        "リセットしました。"
+    );
+
+}
+
+
+/* =========================
+   起動
+========================= */
+
+initialize();
+
+</script>
+
+</body>
+</html>
